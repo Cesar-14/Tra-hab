@@ -49,12 +49,11 @@ pasa_bajas[frecuencias > frecuencia] *= 0
 
 pasa_bajas_data = np.fft.irfft(pasa_bajas)
 
-
 # graficarlas y crear un archivo wav para escucharlas
 
 write("triangulo_pasabajas.wav", frecuencia_muestreo, pasa_bajas_data.astype(np.int16))
 
-plt.plot(frecuencias, np.abs(pasa_bajas), label = "Filtro pasabajas")
+plt.plot(frecuencias, np.abs(pasa_bajas), label="Filtro pasabajas")
 plt.legend()
 plt.show()
 
