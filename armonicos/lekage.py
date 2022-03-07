@@ -2,26 +2,16 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.io.wavfile import write
 
-frecuencia_muestreo = 44100
-frecuencia = 450
-tiempos = np.linspace(0.0,1.0,frecuencia_muestreo)
+frecuencia_muestreo = 44100.0
+frecuencia = 450.0
+duracion  = (1 / frecuencia) * 3
+tiempos = np.linspace(0.0,duracion,int(duracion * frecuencia_muestreo))
 amplitud = np.iinfo(np.int16).max
 
-ciclos = frecuencia * tiempos
+# f(t) = A sin(2pi t)
+data = amplitud * np.sin(2.0 * np.pi * frecuencia * tiempos)
 
-fracciones, enteros = np.modf(ciclos)
-data = fracciones
-
-data = fracciones - 0.5
-
-data = np.abs(data)
-
-data = data - data.mean()
-
-alto, bajo = abs(max(data)), abs(min(data))
-data = amplitud * data / max(alto, bajo)
-
-fig, ejes = plt.subplot(2,4)
+fig, ejes = plt.subplot(1,2)
 
 plt.figure()
 ejes[0,0].plot(tiempos,data)
