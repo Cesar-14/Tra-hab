@@ -3,78 +3,57 @@ import matplotlib.pyplot as plt
 from scipy.io.wavfile import write
 
 frecuencia_muestreo = 44100.0
-frecuencia = 450.0
-duracion  = (1 / frecuencia) * 3
-tiempos = np.linspace(0.0,duracion,int(duracion * frecuencia_muestreo))
+frecuencia = 440.0
+duracion = (1 / frecuencia) * 5
+tiempos = np.linspace(0.0,duracion, int(duracion * frecuencia_muestreo))
 amplitud = np.iinfo(np.int16).max
 
-# f(t) = A sin(2pi t)
-data = amplitud * np.sin(2.0 * np.pi * frecuencia * tiempos)
+# f(t) = A sin(2 pi f t)
+data = amplitud * np.sin(2 + np.pi * frecuencia * tiempos)
 
-fig, ejes = plt.subplot(1,2)
+fig, ejes = plt.subplots(5,3)
 
-plt.figure()
 ejes[0,0].plot(tiempos,data)
-plt.show()
-
-write("Triangulo.wav", frecuencia_muestreo, data.astype(np.int16))
 
 cantidad_muestras = len(data)
 periodo_muestreo = 1.0 / frecuencia_muestreo
 transformada = np.fft.rfft(data)
 frecuencias = np.fft.rfftfreq(cantidad_muestras, periodo_muestreo)
 
-plt.figure()
-plt.plot(frecuencias, np.abs(transformada))
-# plt.show()
+ejes[0,1].plot(frecuencias, np.abs(transformada))
 
-# Ejercicio Clase
+duracion_segunda = (1.0/frecuencia) * 4.81
+tiempos_segunda = np.linspace(0.0, duracion_segunda, int(duracion_segunda * frecuencia_muestreo))
+data_segunda = amplitud * np.sin(2 + np.pi * frecuencia * tiempos_segunda)
 
-# 1.- Obtener en Hz las frecuencias de los armonicos de la señal
+ejes[1,0].plot(tiempos_segunda, data_segunda)
 
-print(frecuencias[transformada > 100000])
-    
-# 2.- Aplicarle un filtro pasabajas que solo deje pasar la Freq Fundamental y luego aplicarle una transformada inversa
+cantidad_muestras_segunda = len(data_segunda)
+transformada_segunda = np.fft.rfft(data_segunda)
+frecuencias_segunda = np.fft.rfftfreq(cantidad_muestras_segunda, periodo_muestreo)
+ejes[1,1].plot(frecuencias_segunda, np.abs(transformada_segunda))
 
-pasa_bajas = transformada.copy()
-pasa_bajas[frecuencias > frecuencia] *= 0
+ventana_hamming = np.hamming(len(data_segunda))
 
-pasa_bajas_data = np.fft.irfft(pasa_bajas)
+ejes[2,2].plot(tiempos_segunda, ventana_hamming)
+data_segunda_filtrada = data_segunda * ventana_hamming
 
-# graficarlas y crear un archivo wav para escucharlas
+ejes[2,0].plot(tiempos_segunda, data_segunda_filtrada)
 
-write("triangulo_pasabajas.wav", frecuencia_muestreo, pasa_bajas_data.astype(np.int16))
+transformada_filtrada_hamming = np.fft.rfft(data_segunda_filtrada)
+ejes[2,1].plot(frecuencias_segunda, np.abs(transformada_filtrada_hamming))
 
-ejes[0,3].plot(frecuencias, np.abs(pasa_bajas), label="Filtro pasabajas")
-ejes[0,3].legend()
-# plt.show()
-ejes[0,2].plot(tiempos,pasa_bajas_data, label="Audio pasabajas")
-ejes[0,2].legend()
+ventana_blackman = np.blackman(len(data_segunda))
+ejes[3,2].plot(tiempos_segunda, ventana_blackman)
+data_segunda_blackman = data_segunda * ventana_blackman
+ejes[3,0].plot(tiempos_segunda, data_segunda_blackman)
+transformada_filtrada_blackman = np.fft.rfft(data_segunda_blackman)
+ejes[3,1].plot(frecuencias_segunda, np.abs(transformada_filtrada_blackman))
 
-
-ciclos_rectangular = frecuencia * tiempos
-fracciones_rectangular, enteros_rectangular = np.modf(ciclos_rectangular)
-data_rectangular = (
-    amplitud * np.sign(
-        fracciones_rectangular - fracciones_rectangular.mean())
-    )
-
-ejes[1,0].plot(tiempos,data_rectangular)
-
-
-transformada_rectangular = np.fft.rfft(data_rectangular)
-frecuencias_rectangular = np.fft.rfftfreq(cantidad_muestras, periodo_muestreo)
-
-ejes[1,1].plot(frecuencias_rectangular, np.abs(transformada_rectangular))
-
-pasa_bajas_rectangular = transformada.copy()
-pasa_bajas_rectangular[frecuencias_rectangular > frecuencia] *= 0
-
-ejes[1,3].plot(frecuencias_rectangular, np.pasa_bajas_rectangular)
-
-pasa_bajas_data_rectangular = np.fft.irfft(pasa_bajas_rectangular)
-
-ejes[1,2].plot(tiempos, pasa_bajas_data_rectangular)
-
-
+ventana_barlett = np.bartlett(len(data_segunda))
+ejes[4,2].plot(tiempos_segunda, ventana_barlett)
+data_segunda_barlett = data_segunda * ventana_barlett
+ejes[4,0].plot(tiempos_segunda, data_segunda_barlett)
+transformada_filtrada_barlett = np.fft.rfft(data_segunda_barlett)
+ejes[4,1].plot(frecuencias_segunda, np.abs(transformada_filtrada_barlett))
 plt.show()
